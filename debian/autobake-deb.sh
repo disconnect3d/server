@@ -12,7 +12,7 @@ set -e
 # building the deb packages here.
 export DEB_BUILD_OPTIONS="nocheck $DEB_BUILD_OPTIONS"
 
-# Travis-CI optimizations
+# Travis-CI optimizations to keep build small (in both duration and disk space)
 if [[ $TRAVIS ]]
 then
   # On Travis-CI, the log must stay under 4MB so make the build less verbose
@@ -116,9 +116,9 @@ dch -b -D ${CODENAME} -v "${EPOCH}${UPSTREAM}${PATCHLEVEL}~${CODENAME}" "Automat
 
 echo "Creating package version ${EPOCH}${UPSTREAM}${PATCHLEVEL}~${CODENAME} ... "
 
-# On Travis CI, use -b to build binary only packages as there is no need to
-# waste time on generating the source package.
-if [[ $TRAVIS ]]
+# On Travis CI and Gitlab-CI, use -b to build binary only packages as there is
+# no need to waste time on generating the source package.
+if [[ $TRAVIS ]] || [[ $GITLAB_CI ]]
 then
   BUILDPACKAGE_FLAGS="-b"
 fi
@@ -131,15 +131,15 @@ fakeroot dpkg-buildpackage -us -uc -I $BUILDPACKAGE_FLAGS
 # If the step above fails due to missing dependencies, you can manually run
 #   sudo mk-build-deps debian/control -r -i
 
-# Don't log package contents on Travis-CI to save time and log size
-if [[ ! $TRAVIS ]]
+# Don't log package contents on Travis-CI or Gitlab-CI to save time and log size
+if [[ ! $TRAVIS ]] && [[ ! $GITLAB_CI ]]
 then
   echo "List package contents ..."
   cd ..
-  for package in `ls *.deb`
+  for package in *.deb
   do
-    echo $package | cut -d '_' -f 1
-    dpkg-deb -c $package | awk '{print $1 " " $2 " " $6 " " $7 " " $8}' | sort -k 3
+    echo "$package" | cut -d '_' -f 1
+    dpkg-deb -c "$package" | awk '{print $1 " " $2 " " $6 " " $7 " " $8}' | sort -k 3
     echo "------------------------------------------------"
   done
 fi
