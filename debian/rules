@@ -38,13 +38,6 @@ ifeq (32,$(DEB_HOST_ARCH_BITS))
     CMAKEFLAGS += -DWITHOUT_ROCKSDB=true
 endif
 
-# Skip TokuDB if arch is not amd64 (also disable for kfreebsd-amd64 as it FTBFS)
-# Skipped on the x32 ABI too; untested, but unlikely to work given i386 is not
-# supported.
-ifneq ($(DEB_HOST_ARCH),amd64)
-    CMAKEFLAGS += -DWITHOUT_TOKUDB=true
-endif
-
 # Disable jemalloc on mips* due to #843926
 ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel mips64 mips64el))
     CMAKEFLAGS += -DWITH_JEMALLOC=no
@@ -86,6 +79,7 @@ endif
 	    -DSYSTEM_TYPE="debian-$(DEB_HOST_GNU_SYSTEM)" \
 	    -DCMAKE_SYSTEM_PROCESSOR=$(DEB_HOST_ARCH) \
 	    -DBUILD_CONFIG=mysql_release \
+			-DWITHOUT_TOKUDB=true \
 	    -DPLUGIN_AWS_KEY_MANAGEMENT=NO \
 	    -DDEB=$(DEB_VENDOR) ..'
 
