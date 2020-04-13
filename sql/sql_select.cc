@@ -12569,6 +12569,9 @@ uint check_join_cache_usage(JOIN_TAB *tab,
       !join->allowed_outer_join_with_cache)
     goto no_join_cache;
 
+  if (tab->table->pos_in_table_list->table_function &&
+      !tab->table->pos_in_table_list->table_function->join_cache_allowed())
+    goto no_join_cache;
   /*
     Non-linked join buffers can't guarantee one match
   */
@@ -16312,6 +16315,10 @@ simplify_joins(JOIN *join, List<TABLE_LIST> *join_list, COND *conds, bool top,
       table->embedding->nested_join->not_null_tables|= not_null_tables;
     }
 
+    if (table->table_function &&
+        table->table_function->setup(join->thd, table, &conds))
+      DBUG_RETURN(0);
+
     if (!(table->outer_join & (JOIN_TYPE_LEFT | JOIN_TYPE_RIGHT)) ||
         (used_tables & not_null_tables))
     {
@@ -16324,7 +16331,6 @@ simplify_joins(JOIN *join, List<TABLE_LIST> *join_list, COND *conds, bool top,
       table->outer_join= 0;
       if (!(straight_join || table->straight))
       {
-        table->dep_tables= 0;
         TABLE_LIST *embedding= table->embedding;
         while (embedding)
         {

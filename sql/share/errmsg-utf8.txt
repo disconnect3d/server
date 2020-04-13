@@ -7641,6 +7641,8 @@ ER_JSON_PATH_ARRAY
         eng "JSON path should end with an array identifier in argument %d to function '%s'"
 ER_JSON_ONE_OR_ALL
         eng "Argument 2 to function '%s' must be "one" or "all"."
+ER_JSON_TABLE_ERROR_ON_FIELD
+        eng "Field '%s' can't be set for JSON_TABLE '%s'."
 ER_UNSUPPORT_COMPRESSED_TEMPORARY_TABLE
 	eng "CREATE TEMPORARY TABLE is not allowed with ROW_FORMAT=COMPRESSED or KEY_BLOCK_SIZE."
 ER_GEOJSON_INCORRECT
